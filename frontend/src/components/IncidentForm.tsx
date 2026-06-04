@@ -2,7 +2,16 @@
 
 import React, { useState } from "react";
 import Editor from "@monaco-editor/react";
-import { IncidentIngestSchema, IncidentIngestType } from "@/types/schemas";
+import { z } from "zod";
+import { IncidentSubmitPayload } from "@/types";
+
+const IncidentIngestSchema = z.object({
+  workspace_id: z.string().min(1, "Workspace ID is required"),
+  service_name: z.string().min(1, "Service name is required"),
+  raw_log: z.string().min(1, "Stack trace is required"),
+});
+
+type IncidentIngestType = IncidentSubmitPayload;
 
 export default function IncidentForm() {
   // Setup component local state initialized to our schema fields
@@ -50,7 +59,7 @@ export default function IncidentForm() {
       } else {
         setResponseMsg(`❌ Server Error: ${JSON.stringify(data.detail)}`);
       }
-    } catch (err) {
+    } catch {
       setResponseMsg("❌ Network connection failed. Is FastAPI running?");
     } finally {
       setLoading(false);

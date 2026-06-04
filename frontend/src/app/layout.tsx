@@ -1,35 +1,41 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
-
 export const metadata: Metadata = {
-  title: "Incident Ingestion Pipeline",
-  description: "R&D Environment Tool for Multi-Agent Root Cause Analysis Simulation",
+  title: {
+    default: "TraceAgent — Intelligent Incident Analysis",
+    template: "%s | TraceAgent",
+  },
+  description:
+    "Automated stack trace analysis and root cause detection for engineering teams.",
+  keywords: ["stack trace", "incident analysis", "SRE", "debugging", "DevOps"],
+  authors: [{ name: "TraceAgent" }],
+  icons: {
+    icon: "/favicon.ico",
+  },
+  openGraph: {
+    title: "TraceAgent",
+    description: "Intelligent incident analysis pipeline for engineering teams.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+      </head>
+      <body className="noise">{children}</body>
     </html>
   );
 }
