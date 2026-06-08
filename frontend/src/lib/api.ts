@@ -7,7 +7,7 @@ import {
   User,
 } from "@/types";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
 
 // ── Base Fetcher ──────────────────────────────────────────────────────────────
 
@@ -26,7 +26,11 @@ async function request<T>(
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body?.detail ?? body?.error ?? `HTTP ${res.status}`);
+    const detail = body?.detail ?? body?.error;
+    const message = Array.isArray(detail)
+      ? detail.map((item: { msg?: string }) => item.msg ?? JSON.stringify(item)).join(", ")
+      : detail;
+    throw new Error(message ?? `HTTP ${res.status}`);
   }
 
   return res.json() as Promise<T>;

@@ -135,20 +135,18 @@ export default function LoginPage() {
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <label htmlFor="password">Password</label>
-                <button
-                  type="button"
+                <Link
+                  href="/forgot-password"
                   style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "0.7rem",
-                    color: "var(--accent)",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
+                    fontFamily:    "var(--font-mono)",
+                    fontSize:      "0.7rem",
+                    color:         "var(--accent)",
+                    textDecoration: "none",
                     letterSpacing: "0.04em",
                   }}
                 >
                   Forgot password?
-                </button>
+                </Link>
               </div>
               <div style={{ position: "relative" }}>
                 <input

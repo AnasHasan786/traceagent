@@ -49,7 +49,7 @@ export function useAuth() {
         setToken(token);
         setStoredUser(nextUser);
         setUser(nextUser);
-        router.push("/");
+        router.push("/dashboard");
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : "Login failed.";
         setError(msg);
@@ -79,7 +79,7 @@ export function useAuth() {
         setToken(token);
         setStoredUser(nextUser);
         setUser(nextUser);
-        router.push("/");
+        router.push("/dashboard");
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : "Registration failed.";
         setError(msg);
