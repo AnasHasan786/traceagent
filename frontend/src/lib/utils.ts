@@ -8,26 +8,51 @@ export function cn(...inputs: ClassValue[]) {
 
 // ── Date Formatting ───────────────────────────────────────────────────────────
 
+/**
+ * Ensures a date string is treated as UTC.
+ * MongoDB/Python timestamps often come without the trailing "Z",
+ * which makes JS Date() parse them as local time instead of UTC.
+ * e.g. "2026-06-10T14:19:01" → "2026-06-10T14:19:01Z"
+ */
+function toUTCDate(dateStr: string): Date {
+  if (!dateStr) return new Date(NaN);
+  // Already has timezone info (Z or +offset) — leave as-is
+  if (/Z$|[+-]\d{2}:\d{2}$/.test(dateStr)) return new Date(dateStr);
+  // No timezone suffix → treat as UTC
+  return new Date(dateStr + "Z");
+}
+
 export function formatDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  return new Intl.DateTimeFormat("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
+  const date = toUTCDate(dateStr);
+  if (isNaN(date.getTime())) return "Invalid date";
+  return new Intl.DateTimeFormat(undefined, {
+    day:    "2-digit",
+    month:  "short",
+    year:   "numeric",
+    hour:   "2-digit",
     minute: "2-digit",
   }).format(date);
 }
 
 export function formatRelative(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
+  const date = toUTCDate(dateStr);
+  if (isNaN(date.getTime())) return "unknown";
+
+  const now  = Date.now();
+  const then = date.getTime();
   const diff = Math.floor((now - then) / 1000);
 
-  if (diff < 60)     return "just now";
-  if (diff < 3600)   return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400)  return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
+  if (diff <  0)      return "just now";          // clock skew guard
+  if (diff <  60)     return "just now";
+  if (diff <  3600)   return `${Math.floor(diff / 60)}m ago`;
+  if (diff <  86400)  return `${Math.floor(diff / 3600)}h ago`;
+  if (diff <  604800) return `${Math.floor(diff / 86400)}d ago`;
+  // Older than a week — show the actual date instead
+  return new Intl.DateTimeFormat(undefined, {
+    day:   "2-digit",
+    month: "short",
+    year:  "numeric",
+  }).format(date);
 }
 
 // ── Status Helpers ────────────────────────────────────────────────────────────
