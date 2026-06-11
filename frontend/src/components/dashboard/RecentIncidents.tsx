@@ -11,6 +11,11 @@ interface Props {
 }
 
 export default function RecentIncidents({ incidents, loading }: Props) {
+  // Always render latest-first regardless of what the parent passes in
+  const sorted = [...incidents].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+
   return (
     <div
       className="card"
@@ -29,9 +34,9 @@ export default function RecentIncidents({ incidents, loading }: Props) {
         <div>
           <h3
             style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 600,
-              fontSize:   "0.95rem",
+              fontFamily:   "var(--font-display)",
+              fontWeight:   600,
+              fontSize:     "0.95rem",
               marginBottom: 2,
             }}
           >
@@ -44,11 +49,11 @@ export default function RecentIncidents({ incidents, loading }: Props) {
         <Link
           href="/history"
           style={{
-            fontFamily:    "var(--font-mono)",
-            fontSize:      "0.72rem",
-            color:         "var(--accent)",
+            fontFamily:     "var(--font-mono)",
+            fontSize:       "0.72rem",
+            color:          "var(--accent)",
             textDecoration: "none",
-            letterSpacing: "0.04em",
+            letterSpacing:  "0.04em",
           }}
         >
           View all →
@@ -61,7 +66,7 @@ export default function RecentIncidents({ incidents, loading }: Props) {
           <div style={{ padding: "12px 20px" }}>
             <SkeletonRows rows={4} />
           </div>
-        ) : incidents.length === 0 ? (
+        ) : sorted.length === 0 ? (
           <div
             style={{
               padding:   "40px 20px",
@@ -88,9 +93,9 @@ export default function RecentIncidents({ incidents, loading }: Props) {
             </div>
             <p
               style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 600,
-                fontSize:   "0.875rem",
+                fontFamily:   "var(--font-display)",
+                fontWeight:   600,
+                fontSize:     "0.875rem",
                 marginBottom: 4,
               }}
             >
@@ -101,7 +106,7 @@ export default function RecentIncidents({ incidents, loading }: Props) {
             </p>
           </div>
         ) : (
-          incidents.map((inc, i) => (
+          sorted.map((inc, i) => (
             <Link
               key={inc.id}
               href={`/incident/${inc.id}`}
@@ -109,15 +114,15 @@ export default function RecentIncidents({ incidents, loading }: Props) {
             >
               <div
                 style={{
-                  display:       "flex",
-                  alignItems:    "center",
-                  gap:           14,
-                  padding:       "12px 20px",
-                  borderBottom:  i < incidents.length - 1
+                  display:      "flex",
+                  alignItems:   "center",
+                  gap:          14,
+                  padding:      "12px 20px",
+                  borderBottom: i < sorted.length - 1
                     ? "1px solid var(--border-subtle)"
                     : "none",
-                  transition:    "background 0.15s ease",
-                  cursor:        "pointer",
+                  transition:   "background 0.15s ease",
+                  cursor:       "pointer",
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";
@@ -143,7 +148,7 @@ export default function RecentIncidents({ incidents, loading }: Props) {
                 />
 
                 {/* Info */}
-                <div style={{ flex: 1, overflow: "hidden" }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <p
                     style={{
                       fontFamily:   "var(--font-display)",
@@ -175,11 +180,11 @@ export default function RecentIncidents({ incidents, loading }: Props) {
                 {/* Right side */}
                 <div
                   style={{
-                    display:    "flex",
+                    display:       "flex",
                     flexDirection: "column",
-                    alignItems: "flex-end",
-                    gap:        5,
-                    flexShrink: 0,
+                    alignItems:    "flex-end",
+                    gap:           5,
+                    flexShrink:    0,
                   }}
                 >
                   <span className={getStatusBadgeClass(inc.status)}>
