@@ -330,7 +330,7 @@ export default function SettingsPage() {
           <div className="flex flex-col gap-3">
             {[
               { label: "Queue",    value: "Amazon SQS · us-east-1",      status: "ok"  },
-              { label: "Model",    value: "Amazon Nova Lite / Pro",       status: "ok"  },
+              { label: "Model",    value: "llama-3.3-70b-versatile",       status: "ok"  },
               { label: "Database", value: "MongoDB Atlas · M0 Free Tier", status: "ok"  },
               { label: "Region",   value: "us-east-1 (N. Virginia)",      status: "ok"  },
             ].map((item) => (

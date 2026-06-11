@@ -257,7 +257,7 @@ export default function DashboardPage() {
             letterSpacing: "0.04em",
           }}
         >
-          PIPELINE ACTIVE · SQS CONNECTED · BEDROCK NOVA LITE ·{" "}
+          PIPELINE ACTIVE · SQS CONNECTED · GROQ INFERENCE ENGINE ·{" "}
           <span style={{ color: "var(--status-success)" }}>ALL SYSTEMS OPERATIONAL</span>
         </span>
       </div>

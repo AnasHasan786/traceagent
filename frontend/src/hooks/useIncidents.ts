@@ -12,35 +12,47 @@ export function useIncidents(params?: {
   status?: string;
 }) {
   const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [total, setTotal]         = useState(0);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetch = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await incidentApi.list(params);
-      setIncidents(res.items);
-      setTotal(res.total);
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to load incidents.");
-    } finally {
-      setLoading(false);
+  const page = params?.page;
+  const page_size = params?.page_size;
+  const status = params?.status;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await incidentApi.list({ page, page_size, status });
+        if (!cancelled) {
+          setIncidents(res.items);
+          setTotal(res.total);
+        }
+      } catch (e: unknown) {
+        if (!cancelled)
+          setError(e instanceof Error ? e.message : "Failed to load incidents.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
-  }, [params]);
 
-  useEffect(() => { fetch(); }, [fetch]);
+    load();
+    return () => { cancelled = true; };
+  }, [page, page_size, status]);  // ← primitive values, not object
 
-  return { incidents, total, loading, error, refetch: fetch };
+  return { incidents, total, loading, error, refetch: () => { } };
 }
 
 // ── Single Incident ───────────────────────────────────────────────────────────
 
 export function useIncident(id: string) {
   const [incident, setIncident] = useState<Incident | null>(null);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -60,10 +72,10 @@ export function useIncident(id: string) {
 // ── Submit Incident ───────────────────────────────────────────────────────────
 
 export function useSubmitIncident() {
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState<string | null>(null);
-  const [success, setSuccess]   = useState(false);
-  const [logId, setLogId]       = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [logId, setLogId] = useState<string | null>(null);
 
   const submit = useCallback(async (payload: IncidentSubmitPayload) => {
     setLoading(true);
@@ -95,9 +107,9 @@ export function useSubmitIncident() {
 // ── Dashboard Stats ───────────────────────────────────────────────────────────
 
 export function useDashboardStats() {
-  const [stats, setStats]     = useState<DashboardStats | null>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     dashboardApi

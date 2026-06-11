@@ -122,7 +122,7 @@ function SuccessState({
         }}
       >
         Your stack trace has been pushed to the SQS pipeline. The background
-        worker will process it via Amazon Bedrock shortly.
+        worker will process it via Groq inference engine shortly.
       </p>
 
       {logId && (
@@ -498,7 +498,7 @@ export default function AnalyzePage() {
               {[
                 { step: "01", text: "Trace pushed to Amazon SQS queue" },
                 { step: "02", text: "Background worker picks up message" },
-                { step: "03", text: "Bedrock Nova analyses root cause" },
+                { step: "03", text: "Groq inference engine analyses root cause" },
                 { step: "04", text: "Result saved to MongoDB Atlas" },
               ].map((item) => (
                 <div
@@ -529,34 +529,6 @@ export default function AnalyzePage() {
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Token estimate */}
-          <div
-            style={{
-              padding:      "12px 14px",
-              borderRadius: "var(--radius-md)",
-              background:   "var(--accent-glow)",
-              border:       "1px solid rgba(245,158,11,0.2)",
-            }}
-          >
-            <p
-              style={{
-                fontFamily:    "var(--font-mono)",
-                fontSize:      "0.68rem",
-                color:         "var(--accent)",
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                marginBottom:  5,
-              }}
-            >
-              Cost Estimate
-            </p>
-            <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
-              ~{Math.max(1, Math.ceil(rawLog.length / 4)).toLocaleString()} tokens
-              &nbsp;·&nbsp;
-              ~₹{((rawLog.length / 4) * 0.00006 * 84).toFixed(4)}
-            </p>
           </div>
         </div>
       </div>

@@ -247,7 +247,7 @@ export default function LandingPage() {
               display: "inline-block",
             }}
           />
-          Powered by Amazon Bedrock · Nova Pro
+          Powered by Groq inference engine
         </div>
 
         {/* Headline */}
@@ -401,7 +401,7 @@ export default function LandingPage() {
               </svg>
             }
             title="Actionable Fixes"
-            description="Not just root cause — every analysis includes a concrete, code-level fix suggestion from Amazon Nova Pro."
+            description="Not just root cause — every analysis includes a concrete, code-level fix suggestion."
           />
           <FeatureCard
             icon={
@@ -434,7 +434,7 @@ export default function LandingPage() {
             color: "var(--text-muted)",
           }}
         >
-          Built with Next.js · FastAPI · Amazon Bedrock · MongoDB Atlas
+          Built with Next.js · FastAPI · Groq inference engine · MongoDB Atlas
         </p>
       </footer>
     </div>

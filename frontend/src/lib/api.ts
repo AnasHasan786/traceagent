@@ -36,6 +36,32 @@ async function request<T>(
   return res.json() as Promise<T>;
 }
 
+// ── Base Fetcher (raw Response — for file downloads) ──────────────────────────
+
+async function requestRaw(
+  path: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      ...authHeader(),          // ← Bearer token, same as every other call
+      ...(options.headers ?? {}),
+    },
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const detail = body?.detail ?? body?.error;
+    const message = Array.isArray(detail)
+      ? detail.map((item: { msg?: string }) => item.msg ?? JSON.stringify(item)).join(", ")
+      : detail;
+    throw new Error(message ?? `HTTP ${res.status}`);
+  }
+
+  return res;
+}
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
 export const authApi = {
@@ -83,6 +109,10 @@ export const incidentApi = {
 
   delete: (id: string) =>
     request<{ message: string }>(`/incidents/${id}`, { method: "DELETE" }),
+
+  // Returns the raw Response so the caller can stream it as a Blob download
+  export: (id: string, format: "pdf" | "markdown") =>
+    requestRaw(`/incidents/${id}/export?format=${format}`),
 };
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
