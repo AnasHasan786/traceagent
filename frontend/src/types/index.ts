@@ -26,6 +26,15 @@ export interface Workspace {
 }
 
 
+// ── Notes ─────────────────────────────────────────────────────────────────────
+
+export interface Note {
+  id:         string;
+  body:       string;
+  created_at: string;
+}
+
+
 // ── Incidents ─────────────────────────────────────────────────────────────────
 
 export type IncidentStatus =
@@ -37,21 +46,21 @@ export type IncidentStatus =
   | "permanently_failed";
 
 export interface Incident {
-  id: string;
-  sqs_message_id: string;
-  workspace_id: string;
-  service_name: string;
-  raw_log: string;
-  status: IncidentStatus;
+  id:                   string;
+  sqs_message_id:       string;
+  workspace_id:         string;
+  service_name:         string;
+  raw_log:              string;
+  status:               IncidentStatus;
   root_cause_analysis?: string;
-  actionable_fix?: string;
-  created_at: string;
-  updated_at?: string;
+  actionable_fix?:      string;
+  created_at:           string;
+  notes:                Note[];
 }
 
 export interface IncidentSubmitPayload {
   service_name: string;
-  raw_log: string;
+  raw_log:      string;
   workspace_id: string;
 }
 
@@ -59,15 +68,15 @@ export interface IncidentSubmitPayload {
 // ── API Responses ─────────────────────────────────────────────────────────────
 
 export interface ApiResponse<T> {
-  data?: T;
-  error?: string;
+  data?:    T;
+  error?:   string;
   message?: string;
 }
 
 export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
+  items:     T[];
+  total:     number;
+  page:      number;
   page_size: number;
 }
 
@@ -75,13 +84,13 @@ export interface PaginatedResponse<T> {
 // ── Onboarding ────────────────────────────────────────────────────────────────
 
 export interface OnboardingState {
-  step: number;
-  name: string;
-  email: string;
+  step:     number;
+  name:     string;
+  email:    string;
   password: string;
-  role: UserRole | "";
-  goal: UserGoal | "";
-  company: string;
+  role:     UserRole | "";
+  goal:     UserGoal | "";
+  company:  string;
 }
 
 
@@ -89,8 +98,8 @@ export interface OnboardingState {
 
 export interface DashboardStats {
   total_incidents: number;
-  analyzed: number;
-  failed: number;
-  pending: number;
-  success_rate: number;
+  analyzed:        number;
+  failed:          number;
+  pending:         number;
+  success_rate:    number;
 }

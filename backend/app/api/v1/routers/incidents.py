@@ -4,7 +4,7 @@ import json as _json
 from app.models.incident import ErrorLog
 from app.models.user import User
 from app.core.deps import get_current_user
-from app.schemas.incident import IncidentIngest, IncidentResponse, IncidentListResponse
+from app.schemas.incident import IncidentIngest, IncidentResponse, IncidentListResponse, NoteResponse
 from app.services.queue_service import send_to_ingest_queue
 from beanie import PydanticObjectId
 
@@ -18,7 +18,7 @@ def _to_response(log: ErrorLog) -> IncidentResponse:
         if isinstance(val, str):
             return val
         return _json.dumps(val, indent=2)
-
+ 
     return IncidentResponse(
         id=str(log.id),
         sqs_message_id=log.sqs_message_id,
@@ -29,6 +29,10 @@ def _to_response(log: ErrorLog) -> IncidentResponse:
         root_cause_analysis=_to_str(log.root_cause_analysis),
         actionable_fix=_to_str(log.actionable_fix),
         created_at=log.timestamp,
+        notes=[
+            NoteResponse(id=n.id, body=n.body, created_at=n.created_at)
+            for n in (log.notes or [])
+        ],
     )
 
 

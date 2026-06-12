@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { incidentApi } from "@/lib/api";
 import AnalysisResult from "@/components/incident/AnalysisResult";
 import ExportButton from "@/components/incident/ExportButton";
+import NotesTab from "@/components/incident/NotesTab";
 import { SkeletonRows } from "@/components/shared/LoadingSpinner";
 import {
   getStatusBadgeClass,
@@ -145,15 +146,9 @@ function RawLogPanel({ log }: { log: string }) {
         <TraceEditor value={log} onChange={() => { }} height={280} />
       )}
 
-      {/* Collapsed: preview — NO horizontal scroll */}
+      {/* Collapsed: preview */}
       {!expanded && (
-        <div
-          style={{
-            padding: "14px 18px",
-            background: "var(--bg-surface)",
-          }}
-        >
-          {/* Show first 3 lines, all wrapped so nothing overflows */}
+        <div style={{ padding: "14px 18px", background: "var(--bg-surface)" }}>
           {lines.slice(0, 3).map((line, i) => (
             <p
               key={i}
@@ -161,8 +156,8 @@ function RawLogPanel({ log }: { log: string }) {
                 fontFamily: "var(--font-mono)",
                 fontSize: "0.78rem",
                 color: i === 0 ? "var(--text-secondary)" : "var(--text-muted)",
-                whiteSpace: "pre-wrap",      // ← wrap long lines, never scroll
-                wordBreak: "break-all",     // ← break giant tokens (hex, base64, etc.)
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-all",
                 lineHeight: 1.6,
                 marginBottom: i < 2 && lines.length > 1 ? 2 : 0,
               }}
@@ -275,13 +270,7 @@ function StatusBanner({ status }: { status: string }) {
       <span style={{ color: config.color, flexShrink: 0, marginTop: 1 }}>
         {config.icon}
       </span>
-      <p
-        style={{
-          fontSize: "0.85rem",
-          color: config.color,
-          lineHeight: 1.6,
-        }}
-      >
+      <p style={{ fontSize: "0.85rem", color: config.color, lineHeight: 1.6 }}>
         {config.message}
       </p>
     </div>
@@ -331,6 +320,83 @@ function MetaRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+// ── Tab bar ───────────────────────────────────────────────────────────────────
+
+type Tab = "analysis" | "notes";
+
+function TabBar({
+  active,
+  onChange,
+  noteCount,
+}: {
+  active: Tab;
+  onChange: (t: Tab) => void;
+  noteCount: number;
+}) {
+  const tabs: { id: Tab; label: string; count?: number }[] = [
+    { id: "analysis", label: "Analysis" },
+    { id: "notes",    label: "Notes", count: noteCount },
+  ];
+
+  return (
+    <div
+      style={{
+        display:      "flex",
+        gap:          0,
+        borderBottom: "1px solid var(--border-subtle)",
+        marginBottom: 4,
+      }}
+    >
+      {tabs.map((tab) => (
+        <button
+          key={tab.id}
+          onClick={() => onChange(tab.id)}
+          style={{
+            display:       "flex",
+            alignItems:    "center",
+            gap:           6,
+            padding:       "9px 18px",
+            background:    "transparent",
+            border:        "none",
+            borderBottom:  active === tab.id
+              ? "2px solid var(--accent)"
+              : "2px solid transparent",
+            marginBottom:  "-1px",
+            cursor:        "pointer",
+            fontFamily:    "var(--font-mono)",
+            fontSize:      "0.75rem",
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            color:         active === tab.id ? "var(--accent)" : "var(--text-muted)",
+            transition:    "color 0.15s ease",
+            whiteSpace:    "nowrap",
+          }}
+        >
+          {tab.label}
+          {tab.count !== undefined && tab.count > 0 && (
+            <span
+              style={{
+                fontFamily:   "var(--font-mono)",
+                fontSize:     "0.62rem",
+                background:   active === tab.id
+                  ? "rgba(245,166,35,0.15)"
+                  : "var(--bg-elevated)",
+                color:        active === tab.id ? "var(--accent)" : "var(--text-muted)",
+                border:       `1px solid ${active === tab.id ? "rgba(245,166,35,0.3)" : "var(--border-subtle)"}`,
+                borderRadius: 99,
+                padding:      "1px 7px",
+                transition:   "all 0.15s ease",
+              }}
+            >
+              {tab.count}
+            </span>
+          )}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function IncidentDetailPage({
@@ -338,11 +404,12 @@ export default function IncidentDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = use(params);
+  const { id }                       = use(params);
   const { incident, loading, error } = useIncident(id);
-  const router = useRouter();
-  const [deleting, setDeleting] = useState(false);
-  const [copyDone, setCopyDone] = useState(false);
+  const router                       = useRouter();
+  const [deleting, setDeleting]      = useState(false);
+  const [copyDone, setCopyDone]      = useState(false);
+  const [activeTab, setActiveTab]    = useState<Tab>("analysis");
 
   async function handleDelete() {
     if (!confirm("Delete this incident? This cannot be undone.")) return;
@@ -413,13 +480,7 @@ export default function IncidentDetailPage({
           </svg>
           Back to History
         </Link>
-        <div
-          className="card"
-          style={{
-            padding: "48px",
-            textAlign: "center",
-          }}
-        >
+        <div className="card" style={{ padding: "48px", textAlign: "center" }}>
           <p
             style={{
               fontFamily: "var(--font-display)",
@@ -541,7 +602,6 @@ export default function IncidentDetailPage({
             {copyDone ? "Copied!" : "Copy Report"}
           </button>
 
-
           {incident.status === "analyzed" && (
             <ExportButton
               incidentId={incident.id}
@@ -585,53 +645,62 @@ export default function IncidentDetailPage({
           alignItems: "start",
         }}
       >
-        {/* Left — analysis + raw log */}
-        <div className="flex flex-col gap-5">
-
-          {/* Analysis result */}
-          {incident.status === "analyzed" &&
-            incident.root_cause_analysis &&
-            incident.actionable_fix ? (
-            <AnalysisResult
-              rootCause={incident.root_cause_analysis}
-              actionableFix={incident.actionable_fix}
-            />
-          ) : (
-            incident.status !== "analyzed" && (
-              <div
-                className="card"
-                style={{
-                  padding: "32px",
-                  textAlign: "center",
-                }}
-              >
-                <p
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontWeight: 600,
-                    fontSize: "0.9rem",
-                    marginBottom: 6,
-                    color: "var(--text-secondary)",
-                  }}
-                >
-                  Analysis unavailable
-                </p>
-                <p style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>
-                  This incident did not complete successfully. The raw log is
-                  preserved below.
-                </p>
-              </div>
-            )
-          )}
-
-          {/* Raw log */}
-          <RawLogPanel log={incident.raw_log} />
-        </div>
-
-        {/* Right — metadata */}
+        {/* Left — tabbed content */}
         <div className="flex flex-col gap-4">
 
-          {/* Incident metadata */}
+          {/* Tab bar */}
+          <TabBar
+            active={activeTab}
+            onChange={setActiveTab}
+            noteCount={incident.notes?.length ?? 0}
+          />
+
+          {/* Analysis tab */}
+          {activeTab === "analysis" && (
+            <div className="flex flex-col gap-5">
+              {incident.status === "analyzed" &&
+                incident.root_cause_analysis &&
+                incident.actionable_fix ? (
+                <AnalysisResult
+                  rootCause={incident.root_cause_analysis}
+                  actionableFix={incident.actionable_fix}
+                />
+              ) : (
+                incident.status !== "analyzed" && (
+                  <div className="card" style={{ padding: "32px", textAlign: "center" }}>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontWeight: 600,
+                        fontSize: "0.9rem",
+                        marginBottom: 6,
+                        color: "var(--text-secondary)",
+                      }}
+                    >
+                      Analysis unavailable
+                    </p>
+                    <p style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>
+                      This incident did not complete successfully. The raw log is preserved below.
+                    </p>
+                  </div>
+                )
+              )}
+              <RawLogPanel log={incident.raw_log} />
+            </div>
+          )}
+
+          {/* Notes tab */}
+          {activeTab === "notes" && (
+            <NotesTab
+              incidentId={incident.id}
+              initialNotes={incident.notes ?? []}
+            />
+          )}
+        </div>
+
+        {/* Right — metadata (always visible regardless of tab) */}
+        <div className="flex flex-col gap-4">
+
           <div className="card" style={{ padding: "16px 18px" }}>
             <p
               style={{
@@ -646,18 +715,14 @@ export default function IncidentDetailPage({
               Metadata
             </p>
             <div>
-              <MetaRow label="Service" value={incident.service_name} />
-              <MetaRow label="Status" value={getStatusLabel(incident.status)} />
+              <MetaRow label="Service"   value={incident.service_name} />
+              <MetaRow label="Status"    value={getStatusLabel(incident.status)} />
               <MetaRow label="Workspace" value={incident.workspace_id} />
-              <MetaRow label="Log ID" value={incident.id.slice(0, 16) + "..."} />
-              <MetaRow label="Created" value={formatDate(incident.created_at)} />
-              {incident.updated_at && (
-                <MetaRow label="Updated" value={formatRelative(incident.updated_at)} />
-              )}
+              <MetaRow label="Log ID"    value={incident.id.slice(0, 16) + "..."} />
+              <MetaRow label="Created"   value={formatDate(incident.created_at)} />
             </div>
           </div>
 
-          {/* Token stats */}
           <div className="card" style={{ padding: "16px 18px" }}>
             <p
               style={{
@@ -683,24 +748,20 @@ export default function IncidentDetailPage({
               {incident.root_cause_analysis && (
                 <MetaRow
                   label="Analysis chars"
-                  value={
-                    (incident.root_cause_analysis.length + (incident.actionable_fix?.length ?? 0)).toLocaleString()
-                  }
+                  value={(
+                    incident.root_cause_analysis.length +
+                    (incident.actionable_fix?.length ?? 0)
+                  ).toLocaleString()}
                 />
               )}
             </div>
           </div>
 
-          {/* Re-analyze CTA */}
           {incident.status !== "pending" && (
             <Link
               href="/analyze"
               className="btn btn-ghost"
-              style={{
-                justifyContent: "center",
-                fontSize: "0.82rem",
-                padding: "10px",
-              }}
+              style={{ justifyContent: "center", fontSize: "0.82rem", padding: "10px" }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <path d="M1 4v6h6M23 20v-6h-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

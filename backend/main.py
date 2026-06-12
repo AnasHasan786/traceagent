@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1.routers import auth, password, incidents, dashboard, export
+from app.api.v1.routers import auth, password, incidents, dashboard, export, notes
 from app.core.db import init_db
 from contextlib import asynccontextmanager
 
@@ -36,7 +36,9 @@ app.include_router(auth.router,       prefix="/api/v1")
 app.include_router(incidents.router,  prefix="/api/v1")
 app.include_router(dashboard.router,  prefix="/api/v1")
 app.include_router(password.router,   prefix="/api/v1")
-app.include_router(export.router, prefix="/api/v1")
+app.include_router(export.router,     prefix="/api/v1")
+app.include_router(notes.router,      prefix="/api/v1")
+
 
 @app.get("/health")
 async def health_check():

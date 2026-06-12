@@ -330,21 +330,78 @@ def generate_pdf(log: "ErrorLog") -> bytes:
     story.extend(section("ACTIONABLE FIX", SUCCESS_GR))
     story.extend(render_body_text(_clean(log.actionable_fix), is_fix=True))
 
-    # Raw stack trace section
+    # Raw stack trace section — rendered inside a dark rounded table cell
+    # so long lines wrap properly instead of overflowing the page
     story.extend(section("RAW STACK TRACE", TEXT_MUT))
-    raw_lines = _clean(log.raw_log).split("\n")
-    # Limit to first 80 lines in PDF to keep it readable
+
+    import textwrap as _tw
+
+    raw_lines    = _clean(log.raw_log).split("\n")
     preview_lines = raw_lines[:80]
     if len(raw_lines) > 80:
         preview_lines.append(f"... ({len(raw_lines) - 80} more lines truncated)")
+
+    # Usable width inside the page margins minus table padding
+    # A4 = 210mm, margins = 2*20mm, table padding = 2*8pt ≈ 2*2.8mm → ~146mm usable
+    # At Courier 7.5pt, ~1 char ≈ 4.5pt wide → ~(146mm * 2.835pt/mm) / 4.5 ≈ 92 chars
+    WRAP_WIDTH = 88
+
+    wrapped_html_lines: list[str] = []
     for line in preview_lines:
-        safe_line = (
+        # Escape XML special chars
+        safe = (
             line
             .replace("&", "&amp;")
             .replace("<", "&lt;")
             .replace(">", "&gt;")
         )
-        story.append(Preformatted(safe_line or " ", S["mono"]))
+        if not safe.strip():
+            wrapped_html_lines.append(" ")   # preserve blank lines
+            continue
+        # Hard-wrap lines longer than WRAP_WIDTH chars
+        chunks = _tw.wrap(safe, width=WRAP_WIDTH, break_long_words=True, break_on_hyphens=False)
+        if not chunks:
+            wrapped_html_lines.append(" ")
+        else:
+            # First chunk is normal; continuation chunks get a small indent marker
+            wrapped_html_lines.append(chunks[0])
+            for chunk in chunks[1:]:
+                wrapped_html_lines.append("  ↳ " + chunk)
+
+    # Join into one big string with explicit <br/> tags so ReportLab wraps in one Paragraph
+    # (avoids per-line Paragraph overhead and keeps the monospace block tight)
+    trace_html = "<br/>".join(wrapped_html_lines)
+
+    trace_style = ParagraphStyle(
+        "TA_TraceBlock",
+        fontName    = "Courier",
+        fontSize    = 7.5,
+        leading     = 11,
+        textColor   = colors.HexColor("#a3a3a3"),
+        backColor   = MONO_BG,
+        leftIndent  = 0,
+        rightIndent = 0,
+        wordWrap    = "CJK",   # forces character-level wrapping as last resort
+    )
+
+    # Wrap the whole block in a single-cell Table so we get the dark background
+    # with padding — a plain Paragraph backColor doesn't add padding
+    trace_para = Paragraph(trace_html, trace_style)
+    trace_tbl  = Table(
+        [[trace_para]],
+        colWidths=[(PAGE_W - 2 * MARGIN)],
+        hAlign="LEFT",
+    )
+    trace_tbl.setStyle(TableStyle([
+        ("BACKGROUND",   (0, 0), (-1, -1), MONO_BG),
+        ("BOX",          (0, 0), (-1, -1), 0.5, BORDER),
+        ("LEFTPADDING",  (0, 0), (-1, -1), 10),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+        ("TOPPADDING",   (0, 0), (-1, -1), 10),
+        ("BOTTOMPADDING",(0, 0), (-1, -1), 10),
+        ("VALIGN",       (0, 0), (-1, -1), "TOP"),
+    ]))
+    story.append(trace_tbl)
 
     # Footer
     story.append(Spacer(1, 10 * mm))

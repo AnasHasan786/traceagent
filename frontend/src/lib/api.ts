@@ -5,6 +5,7 @@ import {
   PaginatedResponse,
   DashboardStats,
   User,
+  Note,
 } from "@/types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
@@ -45,7 +46,7 @@ async function requestRaw(
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: {
-      ...authHeader(),          // ← Bearer token, same as every other call
+      ...authHeader(),
       ...(options.headers ?? {}),
     },
   });
@@ -110,9 +111,19 @@ export const incidentApi = {
   delete: (id: string) =>
     request<{ message: string }>(`/incidents/${id}`, { method: "DELETE" }),
 
-  // Returns the raw Response so the caller can stream it as a Blob download
   export: (id: string, format: "pdf" | "markdown") =>
     requestRaw(`/incidents/${id}/export?format=${format}`),
+
+  addNote: (incidentId: string, body: string) =>
+    request<Note>(`/incidents/${incidentId}/notes`, {
+      method: "POST",
+      body:   JSON.stringify({ body }),
+    }),
+
+  deleteNote: (incidentId: string, noteId: string) =>
+    request<{ message: string }>(`/incidents/${incidentId}/notes/${noteId}`, {
+      method: "DELETE",
+    }),
 };
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
