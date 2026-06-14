@@ -130,6 +130,7 @@ export const incidentApi = {
 
 export const dashboardApi = {
   stats: () => request<DashboardStats>("/dashboard/stats"),
+  analytics: () => request<any>("/dashboard/analytics")
 };
 
 // ── Workspaces ────────────────────────────────────────────────────────────────

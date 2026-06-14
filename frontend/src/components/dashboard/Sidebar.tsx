@@ -46,6 +46,21 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  {
+    href: "/analytics",
+    label: "Analytics",
+    exact: false,
+    icon: (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"
+          stroke="currentColor" strokeWidth="1.5"
+          strokeLinecap="round" strokeLinejoin="round" />
+        <polyline points="16 7 22 7 22 13"
+          stroke="currentColor" strokeWidth="1.5"
+          strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
 ];
 
 const BOTTOM_ITEMS = [
@@ -64,17 +79,9 @@ const BOTTOM_ITEMS = [
 // ── Nav Link ──────────────────────────────────────────────────────────────────
 
 function NavLink({
-  href,
-  label,
-  icon,
-  exact,
-  onClick,
+  href, label, icon, exact, onClick,
 }: {
-  href: string;
-  label: string;
-  icon: React.ReactNode;
-  exact?: boolean;
-  onClick?: () => void;
+  href: string; label: string; icon: React.ReactNode; exact?: boolean; onClick?: () => void;
 }) {
   const pathname = usePathname();
   const active = exact ? pathname === href : pathname.startsWith(href);
@@ -84,29 +91,29 @@ function NavLink({
       href={href}
       onClick={onClick}
       style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        padding: "9px 12px",
-        borderRadius: "var(--radius-md)",
-        fontSize: "0.875rem",
-        fontFamily: "var(--font-display)",
-        fontWeight: active ? 600 : 400,
-        color: active ? "var(--text-primary)" : "var(--text-muted)",
-        background: active ? "var(--bg-elevated)" : "transparent",
-        borderLeft: active ? "2px solid var(--accent)" : "2px solid transparent",
+        display:        "flex",
+        alignItems:     "center",
+        gap:            10,
+        padding:        "9px 12px",
+        borderRadius:   "var(--radius-md)",
+        fontSize:       "0.875rem",
+        fontFamily:     "var(--font-display)",
+        fontWeight:     active ? 600 : 400,
+        color:          active ? "var(--text-primary)" : "var(--text-muted)",
+        background:     active ? "var(--bg-elevated)" : "transparent",
+        borderLeft:     active ? "2px solid var(--accent)" : "2px solid transparent",
         textDecoration: "none",
-        transition: "all 0.15s ease",
+        transition:     "all 0.15s ease",
       }}
       onMouseEnter={(e) => {
         if (!active) {
-          (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)";
+          (e.currentTarget as HTMLElement).style.color      = "var(--text-secondary)";
           (e.currentTarget as HTMLElement).style.background = "var(--bg-surface)";
         }
       }}
       onMouseLeave={(e) => {
         if (!active) {
-          (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
+          (e.currentTarget as HTMLElement).style.color      = "var(--text-muted)";
           (e.currentTarget as HTMLElement).style.background = "transparent";
         }
       }}
@@ -125,15 +132,15 @@ export default function Sidebar() {
   return (
     <aside
       style={{
-        width: "var(--sidebar-width)",
-        minHeight: "100vh",
-        background: "var(--bg-surface)",
-        borderRight: "1px solid var(--border-subtle)",
-        display: "flex",
-        flexDirection: "column",
-        padding: "24px 16px",
-        position: "sticky",
-        top: 0,
+        width:        "var(--sidebar-width)",
+        minHeight:    "100vh",
+        background:   "var(--bg-surface)",
+        borderRight:  "1px solid var(--border-subtle)",
+        display:      "flex",
+        flexDirection:"column",
+        padding:      "24px 16px",
+        position:     "sticky",
+        top:          0,
       }}
     >
       {/* Logo */}
@@ -142,17 +149,15 @@ export default function Sidebar() {
       </div>
 
       {/* Section label */}
-      <p
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: "0.65rem",
-          color: "var(--text-muted)",
-          letterSpacing: "0.1em",
-          textTransform: "uppercase",
-          marginBottom: 8,
-          paddingLeft: 12,
-        }}
-      >
+      <p style={{
+        fontFamily:    "var(--font-mono)",
+        fontSize:      "0.65rem",
+        color:         "var(--text-muted)",
+        letterSpacing: "0.1em",
+        textTransform: "uppercase",
+        marginBottom:  8,
+        paddingLeft:   12,
+      }}>
         Workspace
       </p>
 
@@ -164,17 +169,15 @@ export default function Sidebar() {
 
         <div className="divider" style={{ margin: "16px 0" }} />
 
-        <p
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "0.65rem",
-            color: "var(--text-muted)",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            marginBottom: 8,
-            paddingLeft: 12,
-          }}
-        >
+        <p style={{
+          fontFamily:    "var(--font-mono)",
+          fontSize:      "0.65rem",
+          color:         "var(--text-muted)",
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          marginBottom:  8,
+          paddingLeft:   12,
+        }}>
           System
         </p>
 
@@ -185,124 +188,95 @@ export default function Sidebar() {
 
       {/* User profile block */}
       {user && (
-        <div
-          style={{
-            marginTop: "auto",
-            paddingTop: 16,
-            borderTop: "1px solid var(--border-subtle)",
-          }}
-        >
-          <Link
-            href="/settings"
-            style={{ textDecoration: "none" }}
-          >
+        <div style={{
+          marginTop:  "auto",
+          paddingTop: 16,
+          borderTop:  "1px solid var(--border-subtle)",
+        }}>
+          <Link href="/settings" style={{ textDecoration: "none" }}>
             <div
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "10px 12px",
+                display:      "flex",
+                alignItems:   "center",
+                gap:          10,
+                padding:      "10px 12px",
                 borderRadius: "var(--radius-md)",
-                background: "var(--bg-elevated)",
-                border: "1px solid var(--border-subtle)",
+                background:   "var(--bg-elevated)",
+                border:       "1px solid var(--border-subtle)",
                 marginBottom: 10,
-                cursor: "pointer",
-                transition: "all 0.15s ease",
+                cursor:       "pointer",
+                transition:   "all 0.15s ease",
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.borderColor = "var(--accent-dim)";
-                (e.currentTarget as HTMLElement).style.background = "var(--accent-glow)";
+                (e.currentTarget as HTMLElement).style.background  = "var(--accent-glow)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.borderColor = "var(--border-subtle)";
-                (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";
+                (e.currentTarget as HTMLElement).style.background  = "var(--bg-elevated)";
               }}
             >
-              {/* Avatar */}
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: "50%",
-                  background: "var(--accent-glow)",
-                  border: "1px solid rgba(245,158,11,0.3)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 700,
-                  fontSize: "0.75rem",
-                  color: "var(--accent)",
-                }}
-              >
+              <div style={{
+                width:          32,
+                height:         32,
+                borderRadius:   "50%",
+                background:     "var(--accent-glow)",
+                border:         "1px solid rgba(245,158,11,0.3)",
+                display:        "flex",
+                alignItems:     "center",
+                justifyContent: "center",
+                flexShrink:     0,
+                fontFamily:     "var(--font-display)",
+                fontWeight:     700,
+                fontSize:       "0.75rem",
+                color:          "var(--accent)",
+              }}>
                 {initials(user.name)}
               </div>
-
-              {/* Name + email */}
               <div style={{ overflow: "hidden", flex: 1 }}>
-                <p
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontWeight: 600,
-                    fontSize: "0.8rem",
-                    color: "var(--text-primary)",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
+                <p style={{
+                  fontFamily:   "var(--font-display)",
+                  fontWeight:   600,
+                  fontSize:     "0.8rem",
+                  color:        "var(--text-primary)",
+                  overflow:     "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace:   "nowrap",
+                }}>
                   {user.name}
                 </p>
-                <p
-                  style={{
-                    fontSize: "0.72rem",
-                    color: "var(--text-muted)",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    fontFamily: "var(--font-mono)",
-                  }}
-                >
+                <p style={{
+                  fontSize:     "0.72rem",
+                  color:        "var(--text-muted)",
+                  overflow:     "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace:   "nowrap",
+                  fontFamily:   "var(--font-mono)",
+                }}>
                   {user.email}
                 </p>
               </div>
-
-              {/* Settings arrow indicator */}
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                style={{ color: "var(--text-muted)", flexShrink: 0 }}
-              >
-                <path
-                  d="M9 18l6-6-6-6"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                style={{ color: "var(--text-muted)", flexShrink: 0 }}>
+                <path d="M9 18l6-6-6-6" stroke="currentColor"
+                  strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
           </Link>
 
-          {/* Logout */}
           <button
             onClick={logout}
             className="btn btn-ghost"
-            style={{
-              width: "100%",
-              padding: "8px",
-              fontSize: "0.8rem",
-              gap: 8,
-              color: "var(--text-muted)",
-            }}
+            style={{ width: "100%", padding: "8px", fontSize: "0.8rem", gap: 8, color: "var(--text-muted)" }}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              <polyline points="16 17 21 12 16 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"
+                stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <polyline points="16 17 21 12 16 7"
+                stroke="currentColor" strokeWidth="1.5"
+                strokeLinecap="round" strokeLinejoin="round" />
+              <line x1="21" y1="12" x2="9" y2="12"
+                stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             Sign out
           </button>
