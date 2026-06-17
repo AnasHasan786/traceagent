@@ -54,6 +54,7 @@ export interface Incident {
   status:               IncidentStatus;
   root_cause_analysis?: string;
   actionable_fix?:      string;
+  failure_reason?:      string;
   created_at:           string;
   notes:                Note[];
 }

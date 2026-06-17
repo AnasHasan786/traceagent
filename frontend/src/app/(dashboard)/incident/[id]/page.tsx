@@ -186,7 +186,13 @@ function RawLogPanel({ log }: { log: string }) {
 
 // ── Status banner ─────────────────────────────────────────────────────────────
 
-function StatusBanner({ status }: { status: string }) {
+function StatusBanner({
+  status,
+  failureReason,
+}: {
+  status: string;
+  failureReason?: string | null;
+}) {
   const configs: Record<string, {
     bg: string; border: string; color: string; icon: React.ReactNode; message: string;
   }> = {
@@ -206,7 +212,7 @@ function StatusBanner({ status }: { status: string }) {
       bg: "rgba(239,68,68,0.08)",
       border: "rgba(239,68,68,0.2)",
       color: "var(--status-error)",
-      message: "Analysis failed after all retry attempts. The raw log is preserved.",
+      message: "Analysis failed:",
       icon: (
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
@@ -254,6 +260,12 @@ function StatusBanner({ status }: { status: string }) {
   const config = configs[status];
   if (!config) return null;
 
+  // For failed statuses, append the failure_reason to the message if present
+  const displayMessage =
+    failureReason && (status === "failed" || status === "permanently_failed")
+      ? `${config.message} ${failureReason}`
+      : config.message;
+
   return (
     <div
       className="animate-fade-in"
@@ -271,7 +283,7 @@ function StatusBanner({ status }: { status: string }) {
         {config.icon}
       </span>
       <p style={{ fontSize: "0.85rem", color: config.color, lineHeight: 1.6 }}>
-        {config.message}
+        {displayMessage}
       </p>
     </div>
   );
@@ -633,7 +645,10 @@ export default function IncidentDetailPage({
 
       {/* ── Status banner ── */}
       {incident.status !== "analyzed" && (
-        <StatusBanner status={incident.status} />
+        <StatusBanner
+          status={incident.status}
+          failureReason={incident.failure_reason}
+        />
       )}
 
       {/* ── Main grid ── */}
@@ -680,7 +695,7 @@ export default function IncidentDetailPage({
                       Analysis unavailable
                     </p>
                     <p style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>
-                      This incident did not complete successfully. The raw log is preserved below.
+                      This incident did not complete successfully.
                     </p>
                   </div>
                 )

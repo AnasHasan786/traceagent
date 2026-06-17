@@ -17,7 +17,7 @@ function parseSteps(text: string): string[] {
 
   // Otherwise split on numbered patterns: "1)" "2." "Step 1:" etc.
   const byNumber = text
-    .split(/(?=\b(?:Step\s*)?\d+[\)\.]\s)/)
+    .split(/(?=^[1-9][\)\.]\s)/m)
     .map((s) => s.trim())
     .filter(Boolean);
   if (byNumber.length > 1) return byNumber;
@@ -27,7 +27,7 @@ function parseSteps(text: string): string[] {
 }
 
 function isNumberedStep(line: string): boolean {
-  return /^\d+[\)\.]\s/.test(line) || /^Step\s*\d+/i.test(line);
+  return /^[1-9][\)\.]\s/.test(line);
 }
 
 function TextBlock({ text, accent }: { text: string; accent: string }) {

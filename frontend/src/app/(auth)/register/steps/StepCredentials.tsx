@@ -51,7 +51,7 @@ export default function StepCredentials({ state, update, onNext }: Props) {
           id="name"
           type="text"
           className={`input ${errors.name ? "input-error" : ""}`}
-          placeholder="Anas Hasan"
+          placeholder="Enter your full name"
           value={state.name}
           onChange={(e) => update({ name: e.target.value })}
           autoFocus

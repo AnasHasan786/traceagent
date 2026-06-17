@@ -7,6 +7,7 @@ import {
   getStoredUser,
   setStoredUser,
   setToken,
+  getToken,
   clearSession,
   isAuthenticated,
 } from "@/lib/auth";
@@ -14,9 +15,9 @@ import { User, OnboardingState } from "@/types";
 
 export function useAuth() {
   const router = useRouter();
-  const [user, setUser]       = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // ── Bootstrap ───────────────────────────────────────────────────────────────
 
@@ -99,5 +100,21 @@ export function useAuth() {
     router.push("/login");
   }, [router]);
 
-  return { user, loading, error, login, register, logout };
+  // ── Update user (settings page) ──────────────────────────────────────────────
+
+  const updateUser = useCallback((updated: User) => {
+    setStoredUser(updated);
+    setUser(updated);
+  }, []);
+
+  return {
+    user,
+    loading,
+    error,
+    token: getToken(),
+    login,
+    register,
+    logout,
+    setUser: updateUser,
+  };
 }
