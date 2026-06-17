@@ -31,3 +31,7 @@ class UserResponse(BaseModel):
 class AuthResponse(BaseModel):
     token: str
     user: UserResponse
+
+class UpdateProfileRequest(BaseModel):
+    name:    Optional[str] = None
+    company: Optional[str] = None

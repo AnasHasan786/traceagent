@@ -28,6 +28,7 @@ class ErrorLog(Document):
     status:              str                      = Field(default="pending")
     root_cause_analysis: Optional[Any]            = None
     actionable_fix:      Optional[Any]            = None
+    failure_reason:      Optional[str]            = None  # set when status == "failed"
     timestamp:           datetime                 = Field(default_factory=datetime.utcnow)
     notes:               list[IncidentNote]       = Field(default_factory=list)
 

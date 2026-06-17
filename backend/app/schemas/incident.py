@@ -34,6 +34,7 @@ class IncidentResponse(BaseModel):
     status:              str
     root_cause_analysis: Optional[str]          = None
     actionable_fix:      Optional[str]          = None
+    failure_reason:      Optional[str]          = None  
     created_at:          datetime
     notes:               list[NoteResponse]     = []
 

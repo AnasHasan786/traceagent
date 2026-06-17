@@ -18,7 +18,7 @@ def _to_response(log: ErrorLog) -> IncidentResponse:
         if isinstance(val, str):
             return val
         return _json.dumps(val, indent=2)
- 
+
     return IncidentResponse(
         id=str(log.id),
         sqs_message_id=log.sqs_message_id,
@@ -28,6 +28,7 @@ def _to_response(log: ErrorLog) -> IncidentResponse:
         status=log.status,
         root_cause_analysis=_to_str(log.root_cause_analysis),
         actionable_fix=_to_str(log.actionable_fix),
+        failure_reason=log.failure_reason,
         created_at=log.timestamp,
         notes=[
             NoteResponse(id=n.id, body=n.body, created_at=n.created_at)
