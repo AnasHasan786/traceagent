@@ -2,9 +2,10 @@ import os
 import httpx
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.schemas.auth import RegisterRequest, LoginRequest, AuthResponse, UserResponse
+from app.schemas.auth import RegisterRequest, LoginRequest, AuthResponse, UserResponse, UpdateProfileRequest
 from app.models.user import User
-from app.models.incident import Workspace
+from app.models.incident import Workspace, ErrorLog
+from app.models.otp import OTPRecord
 from app.core.security import hash_password, verify_password, create_access_token
 from app.core.deps import get_current_user
 
@@ -74,7 +75,6 @@ async def register_user(payload: RegisterRequest):
         user_id=str(new_user.id), email=new_user.email
     )
 
-    # Fire n8n welcome email webhook (non-blocking)
     await _trigger_n8n_register(email=new_user.email, name=new_user.name)
 
     return AuthResponse(token=access_token, user=to_user_response(new_user))
@@ -99,3 +99,55 @@ async def get_authenticated_user(
     current_user: User = Depends(get_current_user),
 ):
     return to_user_response(current_user)
+
+
+@router.patch("/me", response_model=UserResponse)
+async def update_profile(
+    payload:      UpdateProfileRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """Update name and/or company. Email is not changeable here."""
+    if payload.name is not None:
+        name = payload.name.strip()
+        if not name:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Name cannot be empty.",
+            )
+        current_user.name = name
+
+    if payload.company is not None:
+        current_user.company = payload.company.strip() or None
+
+    await current_user.save()
+    return to_user_response(current_user)
+
+
+@router.delete("/me", status_code=status.HTTP_200_OK)
+async def delete_account(current_user: User = Depends(get_current_user)):
+    """
+    Permanently delete the authenticated user's account.
+    Cascade order:
+      1. OTP records (by email)
+      2. All ErrorLog incidents (by workspace_id)
+      3. The Workspace document
+      4. The User document
+    """
+    user_id   = str(current_user.id)
+    workspace_id = f"workspace-{user_id[:8]}"
+
+    # 1. Delete OTP records tied to this email
+    await OTPRecord.find(OTPRecord.email == current_user.email).delete()
+
+    # 2. Delete all incidents in the user's workspace
+    await ErrorLog.find(ErrorLog.workspace_id == workspace_id).delete()
+
+    # 3. Delete the workspace document
+    workspace = await Workspace.find_one(Workspace.workspace_id == workspace_id)
+    if workspace:
+        await workspace.delete()
+
+    # 4. Finally delete the user — must be last so JWT auth still works above
+    await current_user.delete()
+
+    return {"message": "Account and all associated data deleted successfully."}

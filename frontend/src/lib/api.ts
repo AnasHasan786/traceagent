@@ -86,6 +86,9 @@ export const authApi = {
     }),
 
   me: () => request<User>("/auth/me"),
+
+  deleteAccount: () =>
+    request<{ message: string }>("/auth/me", { method: "DELETE" }),
 };
 
 // ── Incidents ─────────────────────────────────────────────────────────────────
