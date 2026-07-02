@@ -33,6 +33,9 @@ node_modules/
 .env
 .env.*
 !.env.example
+!backend/.env.example
+!frontend/.env.example
+!frontend/.env.local.example
 backend/.env
 frontend/.env
 frontend/.env.local
