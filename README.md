@@ -56,7 +56,7 @@ copy frontend\.env.example frontend\.env.local
 4. Build and start the stack:
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
 5. Open the app:
@@ -64,7 +64,7 @@ docker compose up --build
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8000
 - Health check: http://localhost:8000/health
-- n8n: http://localhost:5678
+- n8n tunnel: http://localhost:5678 (via SSH tunnel)
 
 ## Local development
 
@@ -94,7 +94,14 @@ The app expects the following categories of configuration:
 - JWT signing settings via JWT_SECRET and related values
 - AWS credentials and SQS URL for the queue worker
 - Frontend API base URL via NEXT_PUBLIC_API_URL
-- Optional webhook URLs for n8n automation
+- n8n webhook URLs via N8N_REGISTER_WEBHOOK and N8N_FORGOT_PASSWORD_WEBHOOK
+
+For deployed AWS EC2 use, the backend uses internal Docker service hostnames for n8n:
+
+```env
+N8N_REGISTER_WEBHOOK=http://traceagent-n8n:5678/webhook/register
+N8N_FORGOT_PASSWORD_WEBHOOK=http://traceagent-n8n:5678/webhook/forgot-password
+```
 
 Use the included example files as a starting point. Do not commit real secrets.
 
@@ -102,12 +109,19 @@ Use the included example files as a starting point. Do not commit real secrets.
 
 This project is designed to run on Docker-compatible hosts, including AWS EC2 instances.
 
+### Important deployment behavior
+
+- The frontend build uses `NEXT_PUBLIC_API_URL` as a build argument.
+- The frontend Docker build disables lint/type checks to avoid long builds on small instances.
+- n8n is only exposed locally by default, so access it through an SSH tunnel when needed.
+- If you do not use a permanent Elastic IP, the public EC2 IP will change after each stop/start.
+
 Because public IP addresses on EC2 can change when an instance is stopped and restarted, it is better to use:
 
 - an Elastic IP, or
 - a registered domain with DNS
 
-If you deploy to AWS, update the frontend API URL and any webhook endpoints to match your public host or domain. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for more details.
+If you deploy to AWS, update the frontend API URL and any webhook endpoints to match your public host or domain. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the exact EC2 deployment steps.
 
 ## Security
 
