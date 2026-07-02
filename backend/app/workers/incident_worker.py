@@ -12,6 +12,13 @@ from app.services.analyzer import analyze_stack_trace
 
 load_dotenv()
 
+def _get_sqs_client():
+    return boto3.client(
+        "sqs",
+        region_name=os.getenv("AWS_REGION"),
+        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    )
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
@@ -71,13 +78,6 @@ SIMULATED_FAILURE_REASONS = [
     ),
 ]
 
-sqs_client = boto3.client(
-    "sqs",
-    region_name=os.getenv("AWS_REGION"),
-    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-)
-
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -131,7 +131,7 @@ async def _delete_sqs_message(receipt_handle: str, msg_id: str) -> None:
     for attempt in range(3):
         try:
             await asyncio.to_thread(
-                sqs_client.delete_message,
+                _get_sqs_client().delete_message,
                 QueueUrl=QUEUE_URL,
                 ReceiptHandle=receipt_handle,
             )
@@ -254,7 +254,7 @@ async def start_worker():
     while True:
         try:
             response = await asyncio.to_thread(
-                sqs_client.receive_message,
+                _get_sqs_client().receive_message,
                 QueueUrl=QUEUE_URL,
                 MaxNumberOfMessages=1,
                 WaitTimeSeconds=20,

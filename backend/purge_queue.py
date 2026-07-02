@@ -9,20 +9,23 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-sqs_client = boto3.client(
-    "sqs",
-    region_name=os.getenv("AWS_REGION"),
-    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-)
-
 QUEUE_URL = os.getenv("SQS_QUEUE_URL")
+
+
+def _get_sqs_client():
+    return boto3.client(
+        "sqs",
+        region_name=os.getenv("AWS_REGION"),
+        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    )
+
 
 def purge_queue():
     """Purge all messages from the queue."""
     try:
         print(f"🧹 Purging queue: {QUEUE_URL}")
-        sqs_client.purge_queue(QueueUrl=QUEUE_URL)
+        _get_sqs_client().purge_queue(QueueUrl=QUEUE_URL)
         print("✅ Queue purged successfully. All in-flight and queued messages cleared.")
         print("⏳ Note: Purge can take up to 60 seconds to take full effect in AWS.")
     except Exception as e:
@@ -31,7 +34,7 @@ def purge_queue():
 def check_queue_status():
     """Check current queue attributes."""
     try:
-        attrs = sqs_client.get_queue_attributes(
+        attrs = _get_sqs_client().get_queue_attributes(
             QueueUrl=QUEUE_URL,
             AttributeNames=["ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"]
         )

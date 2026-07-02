@@ -6,15 +6,17 @@ from app.schemas.incident import IncidentIngest
 
 load_dotenv()
 
-# Initialize the programmatic SQS client wrapper
-sqs_client = boto3.client(
-    "sqs",
-    region_name=os.getenv("AWS_REGION"),
-    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
-)
-
 QUEUE_URL = os.getenv("SQS_QUEUE_URL")
+
+
+def _get_sqs_client():
+    return boto3.client(
+        "sqs",
+        region_name=os.getenv("AWS_REGION"),
+        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    )
+
 
 def send_to_ingest_queue(incident: IncidentIngest) -> str:
     """
@@ -25,7 +27,7 @@ def send_to_ingest_queue(incident: IncidentIngest) -> str:
         # Transform the Pydantic data contract into a stringified JSON payload
         message_body = json.dumps(incident.dict())
         
-        response = sqs_client.send_message(
+        response = _get_sqs_client().send_message(
             QueueUrl=QUEUE_URL,
             MessageBody=message_body
         )
